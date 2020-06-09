@@ -52,33 +52,6 @@ resource "azurerm_function_app" "function_app" {
     min_tls_version           = "1.2"
     ftps_state                = "Disabled"
     pre_warmed_instance_count = var.pre_warmed_instance_count
-
-    dynamic "ip_restriction" {
-      for_each = var.allowed_ips
-      iterator = ip
-
-      content {
-        ip_address = ip.value
-      }
-    }
-
-    dynamic "ip_restriction" {
-      for_each = var.allowed_ips_secret == null ? [] : split(";", data.azurerm_key_vault_secret.allowed_ips_secret[0].value)
-      iterator = ip
-
-      content {
-        ip_address = ip.value
-      }
-    }
-
-    dynamic "ip_restriction" {
-      for_each = var.allowed_subnets
-      iterator = subnet
-
-      content {
-        subnet_id = subnet.value
-      }
-    }
   }
 
   app_settings = merge(

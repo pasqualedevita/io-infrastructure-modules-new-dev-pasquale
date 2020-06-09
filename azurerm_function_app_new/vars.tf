@@ -85,50 +85,6 @@ variable app_settings {
   default = {}
 }
 
-variable "allowed_ips" {
-  // List of ip
-  type    = list(string)
-  default = []
-}
-
-variable "allowed_ips_secret" {
-  // List of ip from a keyvault secret
-  type = object({
-    key_vault_id     = string
-    key_vault_secret = string
-  })
-
-  default = null
-}
-
-variable "allowed_subnets" {
-  // List of subnet id
-  type    = list(string)
-  default = []
-}
-
-variable "subnet_id" {
-  type = string
-
-  default = null
-}
-
-variable "virtual_network_info" {
-  type = object({
-    name                  = string
-    resource_group_name   = string
-    subnet_address_prefix = string
-  })
-
-  default = null
-}
-
-variable "avoid_old_subnet_delete" {
-  type = bool
-
-  default = false
-}
-
 variable export_default_key {
   type    = bool
   default = false
