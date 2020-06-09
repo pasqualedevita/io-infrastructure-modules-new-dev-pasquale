@@ -46,7 +46,6 @@ resource "azurerm_function_app" "function_app" {
   app_service_plan_id        = module.app_service_plan.id
   storage_account_name       = module.storage_account.resource_name
   storage_account_access_key = module.storage_account.primary_access_key
-  storage_connection_string  = module.storage_account.primary_connection_string
   
   site_config {
     min_tls_version           = "1.2"
