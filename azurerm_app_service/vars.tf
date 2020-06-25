@@ -61,13 +61,6 @@ variable "app_settings" {
   default = {}
 }
 
-variable "app_settings_secrets" {
-  type = object({
-    key_vault_id = string
-    map          = map(string)
-  })
-}
-
 variable "always_on" {
   type    = bool
   default = true
