@@ -18,6 +18,20 @@ variable "name" {
   type = string
 }
 
+variable "resources_prefix" {
+  type = object({
+    function_app     = string
+    app_service_plan = string
+    storage_account  = string
+  })
+
+  default = {
+    function_app     = "func"
+    app_service_plan = "f"
+    storage_account  = "f"
+  }
+}
+
 variable "resource_group_name" {
   type = string
 }
@@ -55,14 +69,10 @@ variable "app_service_plan_info" {
   }
 }
 
-variable "function_app_monitor" {
-  type = object({
-    enable  = bool
-  })
+variable "pre_warmed_instance_count" {
+  type = number
 
-  default = {
-    enable = false
-  }
+  default = 1
 }
 
 variable application_insights_instrumentation_key {
@@ -75,17 +85,11 @@ variable app_settings {
   default = {}
 }
 
-variable app_dfmonitor_settings {
-  type = map(any)
-
-  default = {}
-}
-
 variable export_default_key {
   type    = bool
   default = false
 }
 
 locals {
-  resource_name = "${var.global_prefix}-${var.environment_short}-func-${var.name}"
+  resource_name = "${var.global_prefix}-${var.environment_short}-${var.resources_prefix.function_app}-${var.name}"
 }

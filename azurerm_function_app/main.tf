@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "=2.4.0"
+  version = "=2.11.0"
   features {}
 }
 
@@ -9,14 +9,14 @@ terraform {
 }
 
 module "storage_account" {
-  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_storage_account?ref=v2.0.0"
+  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_storage_account?ref=v2.0.25"
 
   global_prefix     = var.global_prefix
   environment       = var.environment
   environment_short = var.environment_short
   region            = var.region
 
-  name                     = "f${var.name}"
+  name                     = "${var.resources_prefix.storage_account}${var.name}"
   resource_group_name      = var.resource_group_name
   account_tier             = var.storage_account_info.account_tier
   account_replication_type = var.storage_account_info.account_replication_type
@@ -24,14 +24,14 @@ module "storage_account" {
 }
 
 module "app_service_plan" {
-  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_app_service_plan?ref=v2.0.0"
+  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_app_service_plan?ref=v2.0.25"
 
   global_prefix     = var.global_prefix
   environment       = var.environment
   environment_short = var.environment_short
   region            = var.region
 
-  name                = "f${var.name}"
+  name                = "${var.resources_prefix.app_service_plan}${var.name}"
   resource_group_name = var.resource_group_name
   kind                = var.app_service_plan_info.kind
   sku_tier            = var.app_service_plan_info.sku_tier
@@ -39,52 +39,27 @@ module "app_service_plan" {
 }
 
 resource "azurerm_function_app" "function_app" {
-  name                      = local.resource_name
-  resource_group_name       = var.resource_group_name
-  location                  = var.region
-  version                   = var.runtime_version
-  app_service_plan_id       = module.app_service_plan.id
-  storage_connection_string = module.storage_account.primary_connection_string
-
+  name                       = local.resource_name
+  resource_group_name        = var.resource_group_name
+  location                   = var.region
+  version                    = var.runtime_version
+  app_service_plan_id        = module.app_service_plan.id
+  storage_account_name       = module.storage_account.resource_name
+  storage_account_access_key = module.storage_account.primary_access_key
+  
   site_config {
-    min_tls_version = "1.2"
-    ftps_state = "Disabled"
+    min_tls_version           = "1.2"
+    ftps_state                = "Disabled"
+    pre_warmed_instance_count = var.pre_warmed_instance_count
   }
 
   app_settings = merge(
     {
       APPINSIGHTS_INSTRUMENTATIONKEY = var.application_insights_instrumentation_key
+      # No downtime on slots swap
+      WEBSITE_ADD_SITENAME_BINDINGS_IN_APPHOST_CONFIG = 1
     },
     var.app_settings
-  )
-
-  enable_builtin_logging = false
-
-  tags = {
-    environment = var.environment
-  }
-}
-
-resource "azurerm_function_app" "function_app_monitor" {
-  count = var.function_app_monitor.enable ? 1 : 0
-
-  name                      = "${local.resource_name}-dfm"
-  resource_group_name       = var.resource_group_name
-  location                  = var.region
-  version                   = var.runtime_version
-  app_service_plan_id       = module.app_service_plan.id
-  storage_connection_string = module.storage_account.primary_connection_string
-
-  site_config {
-    min_tls_version = "1.2"
-    ftps_state = "Disabled"
-  }
-
-  app_settings = merge(
-    {
-      APPINSIGHTS_INSTRUMENTATIONKEY = var.application_insights_instrumentation_key
-    },
-    var.app_dfmonitor_settings
   )
 
   enable_builtin_logging = false
@@ -97,7 +72,7 @@ resource "azurerm_function_app" "function_app_monitor" {
 resource "azurerm_template_deployment" "function_keys" {
   count = var.export_default_key ? 1 : 0
 
-  name  = "javafunckeys"
+  name = "javafunckeys"
   parameters = {
     functionApp = azurerm_function_app.function_app.name
   }
