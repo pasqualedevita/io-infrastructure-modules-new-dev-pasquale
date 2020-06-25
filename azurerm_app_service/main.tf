@@ -16,11 +16,12 @@ module "app_service_plan" {
   environment_short = var.environment_short
   region            = var.region
 
-  name                = "app${var.name}"
-  resource_group_name = var.resource_group_name
-  kind                = var.app_service_plan_info.kind
-  sku_tier            = var.app_service_plan_info.sku_tier
-  sku_size            = var.app_service_plan_info.sku_size
+  name                         = "app${var.name}"
+  resource_group_name          = var.resource_group_name
+  kind                         = var.app_service_plan_info.kind
+  sku_tier                     = var.app_service_plan_info.sku_tier
+  sku_size                     = var.app_service_plan_info.sku_size
+  maximum_elastic_worker_count = var.app_service_plan_info.maximum_elastic_worker_count
 }
 
 resource "azurerm_app_service" "app_service" {
