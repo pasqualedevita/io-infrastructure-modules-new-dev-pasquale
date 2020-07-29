@@ -9,7 +9,9 @@ terraform {
 }
 
 resource "azurerm_logic_app_workflow" "logic_app" {
-  name                       = local.resource_name
-  resource_group_name        = var.resource_group_name
-  location                   = var.region
+  name                = local.resource_name
+  resource_group_name = var.resource_group_name
+  location            = var.region
+  workflow_schema     = var.workflow_schema
+  workflow_version    = var.workflow_version
 }
