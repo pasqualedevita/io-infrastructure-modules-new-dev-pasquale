@@ -10,14 +10,6 @@ output "resource_name" {
   value = local.resource_name
 }
 
-output "workflow_schema" {
-  value = var.workflow_schema
-}
-
-output "workflow_version" {
-  value = var.workflow_version
-}
-
 output "access_endpoint" {
   value = azurerm_logic_app_workflow.logic_app.access_endpoint
 }
